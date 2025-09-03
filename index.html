@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rock Paper Scissors</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Fredoka", sans-serif;
+      }
+      .choice-card {
+        transition: all 0.3s ease;
+      }
+      .choice-card.winner {
+        transform: scale(1.1);
+        box-shadow: 0 0 20px theme("colors.yellow.400");
+        border-color: theme("colors.yellow.400");
+      }
+      .action-btn {
+        transition: all 0.2s ease-in-out;
+      }
+      .action-btn:hover {
+        transform: scale(1.05);
+      }
+    </style>
+  </head>
+  <body
+    class="bg-slate-900 text-white flex items-center justify-center min-h-screen p-4"
+  >
+    <!-- Main container with a smaller max-width -->
+    <div class="w-full max-w-md mx-auto">
+      <div class="text-center mb-6">
+        <!-- Reduced title size -->
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">
+          Rock Paper Scissors
+        </h1>
+        <p id="subtitle" class="text-slate-400 mt-1">First to 5 wins!</p>
+      </div>
+
+      <!-- Difficulty Selection Screen -->
+      <div
+        id="difficulty-selection"
+        class="text-center bg-slate-800 p-4 rounded-xl"
+      >
+        <h2 class="text-xl font-semibold mb-4">Choose Your Difficulty</h2>
+        <div class="flex flex-col sm:flex-row justify-center gap-3">
+          <!-- Reduced button padding and text size -->
+          <button
+            data-difficulty="easy"
+            class="action-btn bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg text-lg"
+          >
+            Easy
+          </button>
+          <button
+            data-difficulty="medium"
+            class="action-btn bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold py-2 px-6 rounded-lg text-lg"
+          >
+            Medium
+          </button>
+          <button
+            data-difficulty="hard"
+            class="action-btn bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg text-lg"
+          >
+            Hard
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Game Container -->
+      <div id="game-container" class="hidden">
+        <!-- Difficulty Display -->
+        <div class="text-center mb-3">
+          <p class="text-slate-400">
+            Difficulty:
+            <span id="difficulty-display-text" class="font-semibold"></span>
+          </p>
+        </div>
+
+        <!-- Scoreboard -->
+        <div
+          class="bg-slate-800 rounded-xl p-3 mb-6 flex justify-around items-center text-center"
+        >
+          <div>
+            <p class="text-base font-semibold">You</p>
+            <!-- Reduced score text size -->
+            <p id="player-score" class="text-4xl font-bold">0</p>
+          </div>
+          <div class="text-4xl font-bold text-slate-600">:</div>
+          <div>
+            <p class="text-base font-semibold">AI</p>
+            <!-- Reduced score text size -->
+            <p id="ai-score" class="text-4xl font-bold">0</p>
+          </div>
+        </div>
+
+        <!-- Choices Display -->
+        <div
+          class="flex justify-center items-start gap-4 md:gap-6 mb-6 min-h-[120px] sm:min-h-[140px]"
+        >
+          <div class="text-center">
+            <h2 class="text-base sm:text-lg font-semibold mb-2">Your Choice</h2>
+            <!-- Reduced choice card size -->
+            <div
+              id="player-choice-card"
+              class="choice-card bg-slate-700 w-24 h-24 sm:w-28 sm:h-28 rounded-xl flex items-center justify-center border-4 border-transparent"
+            >
+              <!-- Reduced emoji size -->
+              <span id="player-choice-emoji" class="text-4xl sm:text-5xl"
+                >?</span
+              >
+            </div>
+          </div>
+          <div class="text-center">
+            <h2 class="text-base sm:text-lg font-semibold mb-2">AI's Choice</h2>
+            <!-- Reduced choice card size -->
+            <div
+              id="ai-choice-card"
+              class="choice-card bg-slate-700 w-24 h-24 sm:w-28 sm:h-28 rounded-xl flex items-center justify-center border-4 border-transparent"
+            >
+              <!-- Reduced emoji size -->
+              <span id="ai-choice-emoji" class="text-4xl sm:text-5xl">?</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Result Message -->
+        <div
+          id="result-message"
+          class="text-center text-lg sm:text-xl font-semibold min-h-[2.5rem] mb-6"
+        >
+          Choose your move!
+        </div>
+
+        <!-- Player Move Buttons -->
+        <div id="move-buttons" class="flex justify-center gap-3 flex-wrap">
+          <!-- Reduced move button size -->
+          <button
+            data-move="rock"
+            class="move-btn action-btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-5 rounded-lg text-3xl"
+          >
+            ✊
+          </button>
+          <button
+            data-move="paper"
+            class="move-btn action-btn bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-5 rounded-lg text-3xl"
+          >
+            ✋
+          </button>
+          <button
+            data-move="scissors"
+            class="move-btn action-btn bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-5 rounded-lg text-3xl"
+          >
+            ✌️
+          </button>
+        </div>
+
+        <!-- In-Game Action Buttons -->
+        <div id="ingame-buttons-container" class="text-center mt-6 hidden">
+          <div class="flex flex-col sm:flex-row justify-center gap-3">
+            <button
+              id="reset-btn"
+              class="action-btn bg-slate-600 hover:bg-slate-700 text-white font-bold py-2 px-6 rounded-lg text-lg"
+            >
+              Reset Game
+            </button>
+            <button
+              id="change-difficulty-ingame-btn"
+              class="action-btn bg-slate-600 hover:bg-slate-700 text-white font-bold py-2 px-6 rounded-lg text-lg"
+            >
+              Change Difficulty
+            </button>
+          </div>
+        </div>
+
+        <!-- End Game Buttons -->
+        <div id="end-game-container" class="text-center mt-6 hidden">
+          <div class="flex flex-col sm:flex-row justify-center gap-3">
+            <button
+              id="play-again-btn"
+              class="action-btn bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold py-2 px-6 rounded-lg text-lg"
+            >
+              Play Again
+            </button>
+            <button
+              id="change-difficulty-btn"
+              class="action-btn bg-slate-600 hover:bg-slate-700 text-white font-bold py-2 px-6 rounded-lg text-lg"
+            >
+              Change Difficulty
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- DOM ELEMENTS ---
+      const difficultySelectionEl = document.getElementById(
+        "difficulty-selection"
+      );
+      const gameContainerEl = document.getElementById("game-container");
+      const difficultyDisplayTextEl = document.getElementById(
+        "difficulty-display-text"
+      );
+      const playerScoreEl = document.getElementById("player-score");
+      const aiScoreEl = document.getElementById("ai-score");
+      const playerChoiceCard = document.getElementById("player-choice-card");
+      const aiChoiceCard = document.getElementById("ai-choice-card");
+      const playerChoiceEmoji = document.getElementById("player-choice-emoji");
+      const aiChoiceEmoji = document.getElementById("ai-choice-emoji");
+      const resultMessageEl = document.getElementById("result-message");
+      const moveButtonsContainer = document.getElementById("move-buttons");
+      const ingameButtonsContainer = document.getElementById(
+        "ingame-buttons-container"
+      );
+      const resetBtn = document.getElementById("reset-btn");
+      const changeDifficultyIngameBtn = document.getElementById(
+        "change-difficulty-ingame-btn"
+      );
+      const endGameContainer = document.getElementById("end-game-container");
+      const playAgainBtn = document.getElementById("play-again-btn");
+      const changeDifficultyBtn = document.getElementById(
+        "change-difficulty-btn"
+      );
+
+      // --- GAME LOGIC VARIABLES ---
+      const moves = ["rock", "paper", "scissors"];
+      const emojis = { rock: "✊", paper: "✋", scissors: "✌️" };
+      const winningMoves = {
+        rock: "paper",
+        paper: "scissors",
+        scissors: "rock",
+      };
+      const WIN_CONDITION = 5;
+
+      let playerScore = 0;
+      let aiScore = 0;
+      let isGameOver = false;
+      let currentDifficulty = "";
+
+      // --- AI LEARNING VARIABLES ---
+      let playerMoveHistory = [];
+      let secondOrderMatrix = {};
+
+      // --- AI PREDICTION LOGIC ---
+      function predictEasyMove() {
+        if (playerMoveHistory.length === 0)
+          return moves[Math.floor(Math.random() * moves.length)];
+        let counts = { rock: 0, paper: 0, scissors: 0 };
+        playerMoveHistory.forEach((move) => counts[move]++);
+        return Object.keys(counts).reduce((a, b) =>
+          counts[a] > counts[b] ? a : b
+        );
+      }
+
+      function predictMediumMove() {
+        const historyLen = playerMoveHistory.length;
+        if (historyLen < 1) return predictEasyMove();
+        const lastMove = playerMoveHistory[historyLen - 1];
+        let counts = { rock: 0, paper: 0, scissors: 0 };
+        for (let i = 0; i < historyLen - 1; i++) {
+          if (playerMoveHistory[i] === lastMove)
+            counts[playerMoveHistory[i + 1]]++;
+        }
+        const totalObservations = Object.values(counts).reduce(
+          (a, b) => a + b,
+          0
+        );
+        return totalObservations > 0
+          ? Object.keys(counts).reduce((a, b) =>
+              counts[a] > counts[b] ? a : b
+            )
+          : predictEasyMove();
+      }
+
+      function predictHardMove() {
+        const historyLen = playerMoveHistory.length;
+        if (historyLen >= 2) {
+          const lastMove = playerMoveHistory[historyLen - 1];
+          const secondLastMove = playerMoveHistory[historyLen - 2];
+          const potentialNextMoves =
+            secondOrderMatrix[secondLastMove][lastMove];
+          const totalObservations = Object.values(potentialNextMoves).reduce(
+            (a, b) => a + b,
+            0
+          );
+          if (totalObservations > 0) {
+            return Object.keys(potentialNextMoves).reduce((a, b) =>
+              potentialNextMoves[a] > potentialNextMoves[b] ? a : b
+            );
+          }
+        }
+        return predictMediumMove();
+      }
+
+      function getAiMove() {
+        let predictedPlayerMove;
+        switch (currentDifficulty) {
+          case "easy":
+            predictedPlayerMove = predictEasyMove();
+            break;
+          case "medium":
+            predictedPlayerMove = predictMediumMove();
+            break;
+          case "hard":
+            predictedPlayerMove = predictHardMove();
+            break;
+          default:
+            predictedPlayerMove = predictEasyMove();
+        }
+        return winningMoves[predictedPlayerMove];
+      }
+
+      // --- CORE GAME LOGIC ---
+      function playRound(playerMove) {
+        if (isGameOver) return;
+        const aiMove = getAiMove();
+        updateHistory(playerMove);
+        const winner = getWinner(playerMove, aiMove);
+        updateUI(playerMove, aiMove, winner);
+        if (playerScore >= WIN_CONDITION || aiScore >= WIN_CONDITION) {
+          endGame();
+        }
+      }
+
+      function updateHistory(playerMove) {
+        if (currentDifficulty === "hard" && playerMoveHistory.length >= 2) {
+          const lastMove = playerMoveHistory[playerMoveHistory.length - 1];
+          const secondLastMove =
+            playerMoveHistory[playerMoveHistory.length - 2];
+          secondOrderMatrix[secondLastMove][lastMove][playerMove]++;
+        }
+        playerMoveHistory.push(playerMove);
+      }
+
+      function getWinner(playerMove, aiMove) {
+        if (playerMove === aiMove) return "draw";
+        return winningMoves[playerMove] === aiMove ? "AI" : "You";
+      }
+
+      function updateUI(playerMove, aiMove, winner) {
+        playerChoiceEmoji.textContent = emojis[playerMove];
+        aiChoiceEmoji.textContent = emojis[aiMove];
+        playerChoiceCard.classList.remove("winner");
+        aiChoiceCard.classList.remove("winner");
+
+        if (winner === "You") {
+          playerScore++;
+          resultMessageEl.textContent = "🎉 You win this round!";
+          playerChoiceCard.classList.add("winner");
+        } else if (winner === "AI") {
+          aiScore++;
+          resultMessageEl.textContent = "💻 AI wins this round!";
+          aiChoiceCard.classList.add("winner");
+        } else {
+          resultMessageEl.textContent = "⚖️ It's a draw!";
+        }
+        playerScoreEl.textContent = playerScore;
+        aiScoreEl.textContent = aiScore;
+      }
+
+      function endGame() {
+        isGameOver = true;
+        moveButtonsContainer.classList.add("hidden");
+        ingameButtonsContainer.classList.add("hidden"); // Hide in-game buttons
+        endGameContainer.classList.remove("hidden"); // Show end-game buttons
+        if (playerScore > aiScore) {
+          resultMessageEl.textContent =
+            "🏆 Congratulations! You won the match!";
+          resultMessageEl.classList.add("text-yellow-400");
+        } else {
+          resultMessageEl.textContent = "😈 The AI won! Better luck next time!";
+          resultMessageEl.classList.add("text-red-500");
+        }
+      }
+
+      function createPatternMatrix() {
+        const matrix = {};
+        moves.forEach((m1) => {
+          matrix[m1] = {};
+          moves.forEach((m2) => {
+            matrix[m1][m2] = {};
+            moves.forEach((m3) => {
+              matrix[m1][m2][m3] = 0;
+            });
+          });
+        });
+        return matrix;
+      }
+
+      function startGame(difficulty) {
+        currentDifficulty = difficulty;
+        playerScore = 0;
+        aiScore = 0;
+        isGameOver = false;
+        playerMoveHistory = [];
+        if (difficulty === "hard") secondOrderMatrix = createPatternMatrix();
+
+        // Update and style difficulty display
+        difficultyDisplayTextEl.textContent =
+          difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+        difficultyDisplayTextEl.classList.remove(
+          "text-green-400",
+          "text-yellow-400",
+          "text-red-400"
+        );
+        switch (difficulty) {
+          case "easy":
+            difficultyDisplayTextEl.classList.add("text-green-400");
+            break;
+          case "medium":
+            difficultyDisplayTextEl.classList.add("text-yellow-400");
+            break;
+          case "hard":
+            difficultyDisplayTextEl.classList.add("text-red-400");
+            break;
+        }
+
+        playerScoreEl.textContent = "0";
+        aiScoreEl.textContent = "0";
+        resultMessageEl.textContent = "Choose your move!";
+        playerChoiceEmoji.textContent = "?";
+        aiChoiceEmoji.textContent = "?";
+        playerChoiceCard.classList.remove("winner");
+        aiChoiceCard.classList.remove("winner");
+        resultMessageEl.classList.remove("text-yellow-400", "text-red-500");
+
+        // Manage button visibility
+        moveButtonsContainer.classList.remove("hidden");
+        ingameButtonsContainer.classList.remove("hidden");
+        endGameContainer.classList.add("hidden");
+
+        difficultySelectionEl.classList.add("hidden");
+        gameContainerEl.classList.remove("hidden");
+      }
+
+      function showDifficultyScreen() {
+        gameContainerEl.classList.add("hidden");
+        difficultySelectionEl.classList.remove("hidden");
+      }
+
+      // --- EVENT LISTENERS ---
+      document.querySelectorAll(".action-btn, .move-btn").forEach((button) => {
+        button.addEventListener("click", (e) => {
+          const difficulty = e.currentTarget.dataset.difficulty;
+          const move = e.currentTarget.dataset.move;
+          if (difficulty) {
+            startGame(difficulty);
+          } else if (move) {
+            playRound(move);
+          }
+        });
+      });
+
+      playAgainBtn.addEventListener("click", () =>
+        startGame(currentDifficulty)
+      );
+
+      // Reset button calls startGame with the same difficulty
+      resetBtn.addEventListener("click", () => startGame(currentDifficulty));
+
+      // Both "Change Difficulty" buttons will show the difficulty screen
+      changeDifficultyBtn.addEventListener("click", showDifficultyScreen);
+      changeDifficultyIngameBtn.addEventListener("click", showDifficultyScreen);
+    </script>
+  </body>
+</html>
